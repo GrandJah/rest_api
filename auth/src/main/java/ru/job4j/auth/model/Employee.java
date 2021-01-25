@@ -24,4 +24,12 @@ public class Employee {
 
   @OneToMany
   List<Person> accounts = new ArrayList<>();
+
+  public List<Integer> getAccIds() {
+    List<Integer> ids = new ArrayList<>();
+    for (Person person : accounts) {
+      ids.add(person.getId());
+    }
+    return ids;
+  }
 }

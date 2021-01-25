@@ -38,7 +38,7 @@ public class EmployeeControl {
   public ResponseEntity<List<Employee>> findAll() {
     List<Employee> employees = new ArrayList<>();
     for (Employee employee : this.employeeRepository.findAll()) {
-      getAccounts(employee);
+      employee.setAccounts(this.getAccountsFromRest(employee.getAccIds()));
       employees.add(employee);
     }
     return new ResponseEntity<>(employees, HttpStatus.OK);
@@ -46,21 +46,22 @@ public class EmployeeControl {
 
   @GetMapping("/{id}")
   public ResponseEntity<Employee> findById(@PathVariable int id) {
-    Optional<Employee> employee = this.employeeRepository.findById(id);
-    if (employee.isPresent()) {
-      getAccounts(employee.get());
-      return new ResponseEntity<>(employee.get(), HttpStatus.OK);
+    Optional<Employee> employeeOpt = this.employeeRepository.findById(id);
+    if (employeeOpt.isPresent()) {
+      Employee employee = employeeOpt.get();
+      employee.setAccounts(this.getAccountsFromRest(employee.getAccIds()));
+      return new ResponseEntity<>(employee, HttpStatus.OK);
     }
     return ResponseEntity.notFound()
                          .build();
   }
 
-  private void getAccounts(Employee employee) {
+  private List<Person> getAccountsFromRest(List<Integer> ids) {
     List<Person> accounts = new ArrayList<>();
-    for (Person person : employee.getAccounts()) {
-      accounts.add(rest.getForObject(API_ID, Person.class, person.getId()));
+    for (Integer id : ids) {
+      accounts.add(rest.getForObject(API_ID, Person.class, id));
     }
-    employee.setAccounts(accounts);
+    return accounts;
   }
 
   @PostMapping("/")
